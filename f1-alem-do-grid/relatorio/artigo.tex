@@ -1,0 +1,73 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\renewcommand{\abstractname}{Resumo}
+\renewcommand{\refname}{Referências}
+\title{F1 além do grid: previsão da chegada entre os dez primeiros em Grandes Prêmios de 2010 a 2025}
+\author{\IEEEauthorblockN{Miran Romeiro, Rafael Botezelli e Gustavo Carvalho}}
+\begin{document}
+\maketitle
+\begin{abstract}
+Este estudo investiga em que medida a posição de largada e o histórico recente de pilotos e equipes ajudam a antecipar a classificação entre os dez primeiros em Grandes Prêmios de Fórmula 1. A partir do F1DB, organizamos uma tabela de 6.722 largadas com posição numérica entre 2010 e 2025. Investigamos diferenças entre circuitos, a associação entre forma recente da equipe e chegada e o desempenho preditivo em temporadas posteriores. Um painel interativo permite alterar o período, explorar faixas do grid e confrontar previsões individuais com a classificação oficial. Comparamos duas regressões logísticas em um teste temporal de 1.333 largadas. A inclusão do histórico elevou a área sob a curva ROC de 0,846 para 0,861, enquanto o F1 caiu de 0,793 para 0,789 no limiar de classificação adotado. Entre largadas da oitava à décima terceira posição, equipes com pelo menos metade das participações recentes no top 10 apresentaram maior frequência de chegada nesse grupo. As diferenças observadas descrevem associações históricas e dependem do tamanho da amostra de cada circuito.
+\end{abstract}
+\section{Introdução}
+Com o grid definido, é possível formular uma previsão verificável antes da largada. Um piloto com baixa probabilidade ainda pode terminar entre os dez primeiros. Exploramos essa decisão com três perguntas sobre circuito, forma recente e generalização para corridas futuras.
+\section{Base de dados}
+A distribuição CSV do F1DB v2026.20.0 foi coletada em novembro de 2026 \cite{f1}. Substituímos a base anterior, genérica e de ambiente controlado, para investigar observações dependentes do tempo, desistências e mudanças de equipe em competição real. Combinamos resultados de corridas principais e cadastro dos GPs com pandas \cite{pd}. Dos 6.916 registros originais, excluímos 51 inscrições sem largada (DNS, DNQ ou DNP) e 143 largadas sem grid numérico. Estas últimas contam para o histórico. Restam 6.722 linhas, 11 atributos e 329 GPs. Abandonos participam do denominador; a classificação oficial define o alvo.
+\begin{table}[h]\centering\caption{Dicionário da tabela final}
+\begin{tabular}{lll}\hline Campo&Tipo&Descrição\\\hline
+ano&Numérico&Temporada\\
+etapa&Numérico&Ordem do GP na temporada\\
+gp&Categórico&Identificador do Grande Prêmio\\
+circuito&Categórico&Identificador da pista\\
+piloto&Categórico&Identificador do competidor\\
+equipe&Categórico&Identificador do construtor\\
+grid&Numérico&Posição inicial numérica\\
+formaPiloto&Numérico&Fração recente do piloto no top 10\\
+formaEquipe&Numérico&Fração recente da equipe no top 10\\
+chegada&Categórico&Posição final ou código de situação\\
+top10&Binário&1 se classificado de 1 a 10\\\hline
+\end{tabular}\end{table}
+As formas consideram até cinco etapas encerradas com participação da entidade na temporada. Para equipes, somamos top 10 e largadas de ambos os carros antes de dividir. A base registra ausência de histórico como vazio; o gráfico de forma exclui esses casos e o modelo usa 0,5 como ponto neutro.
+\section{Perguntas analíticas}
+P1: como varia entre circuitos e períodos a frequência de top 10 para quem larga de P8 a P13? P2: equipes com histórico recente distinto têm taxas diferentes em faixas comparáveis de grid? P3: incluir a forma anterior melhora a previsão em temporadas futuras e que erros persistem?
+\begin{table}[h]\centering\caption{Evidências usadas para cada pergunta}
+\begin{tabular}{lll}\hline Pergunta&Painel&Aprendizado de máquina\\\hline
+P1&Grid e mapa por circuito&---\\
+P2&Forma recente por faixa&---\\
+P3&Métricas, matriz e GP&Regressões logísticas\\\hline
+\end{tabular}\end{table}
+\section{Dashboard}
+A página estática usa HTML, CSS e JavaScript \cite{web}. Os dados e probabilidades ficam disponíveis localmente. Títulos e rótulos identificam a medida, com valores impressos para leitura independente das cores.
+\begin{enumerate}
+\item Barras por posição, filtradas por período, mostram a frequência de top 10. A altura cai de 91,2\% em P1 para 57,2\% em P10 e 9,3\% em P20 no período completo.
+\item Mapa por circuito (P1). A intensidade da cor representa proporção, acompanhada de sucessos e total. Três colunas distinguem pares de posições. Mudar o período expõe amostras menores.
+\item Pontos por grupo de forma (P2). O filtro de faixa de grid complementa o de período. O ponto representa a taxa e o traço mostra intervalo binomial de Wilson de 95\%. A dependência entre largadas do mesmo GP limita a interpretação inferencial.
+\item Barras de métricas (P3). Azul identifica grid e verde identifica modelo completo. O filtro de temporada permite comparar os modelos nas mesmas largadas. Os rótulos permitem ler diferenças pequenas.
+\item Matriz (P3). Linhas representam resultado e colunas, previsão. Selecionar modelo e ano mostra como varia a contagem de erros de cada tipo.
+\item Quadro do GP (P3). Um seletor de corrida e um botão de revelação separam a previsão da conferência da chegada. A ordem do grid permite localizar pilotos específicos.
+\end{enumerate}
+\section{Técnica de aprendizado de máquina}
+A regressão logística estima a probabilidade do alvo binário por $p=(1+\exp(-z))^{-1}$, com $z$ igual ao intercepto mais a soma ponderada das entradas. Os pesos minimizam perda logarítmica com penalização L2. A padronização é ajustada somente nos dados usados para treinar em cada fase \cite{sk}. A primeira especificação usa grid. A segunda acrescenta formaPiloto e formaEquipe. Ambos os modelos usam informações disponíveis na largada.
+Treinamos em 2010--2019 (4.201 linhas), selecionamos o inverso da força de regularização $C$ entre 0,01, 0,1, 1 e 10 por menor perda logarítmica em 2020--2022 (1.188) e reajustamos em 2010--2022. O teste contém 70 GPs em 2023--2025 (1.333 linhas). Cada GP pertence a uma única partição. A forma se atualiza após cada etapa de teste; os pesos permanecem fixos. Os valores escolhidos de $C$ foram 0,1 e 10, respectivamente. O limiar 0,5 gera classificações individuais e pode selecionar mais ou menos de dez pilotos por GP.
+\begin{table}[h]\centering\caption{Métricas do teste temporal}
+\begin{tabular}{lrr}\hline Métrica&Grid&Grid e histórico\\\hline
+Acurácia&0,784&0,786\\Precisão&0,789&0,807\\Recall&0,796&0,773\\F1&0,793&0,789\\AUC-ROC&0,846&0,861\\\hline
+\end{tabular}\end{table}
+\section{Respostas às perguntas analíticas}
+\subsection{P1: circuito e período}
+Entre P8 e P13, Interlagos registrou 35 chegadas no top 10 em 88 largadas (39,8\%) e Suzuka, 46 em 84 (54,8\%). Em 2022--2025 as taxas foram 6/23 e 12/24. O filtro preserva a diferença nesses exemplos e reduz os denominadores. O desenho observacional impede atribuir a diferença ao traçado isoladamente.
+\subsection{P2: forma da equipe}
+Entre P8 e P13 com histórico disponível, equipes com forma de pelo menos 50\% atingiram 601/993 (60,5\%) contra 321/870 (36,9\%) no grupo abaixo desse limiar. A diferença de 23,6 pontos percentuais combina histórico, pilotos e características dos carros. A ausência de histórico no começo da temporada limita a cobertura.
+\subsection{P3: previsão e erros}
+A AUC cresce cerca de 0,015 e indica melhor ordenação dos pares positivo-negativo. No limiar fixo, os falsos positivos caem de 147 para 128, mas os falsos negativos sobem de 141 para 157. Os verdadeiros negativos e positivos são 495 e 550 no modelo de grid e 514 e 534 no completo. A troca melhora a precisão à custa de recall. No Bahrein de 2023, Bottas largou em P12 com cerca de 43\% no modelo completo e chegou em P8: um falso negativo. Essa abertura de temporada ilustra o caso de forma indisponível.
+\section{Conclusão}
+O grid oferece uma referência forte e o histórico acrescenta informação modesta de ordenação. Um próximo experimento poderia avaliar calibração por temporada e quantificar incerteza com reamostragem por GP. A ausência de telemetria, clima e estratégia restringe a interpretação dos erros individuais. As previsões aplicam-se a largadas com grid numérico.
+\begin{thebibliography}{4}
+\bibitem{f1} F1DB Contributors, F1DB: Formula 1 Database, v2026.20.0, 2026. \url{https://github.com/f1db/f1db/releases/tag/v2026.20.0}.
+\bibitem{pd} The pandas development team, pandas, v2.2.3. \url{https://pandas.pydata.org/}.
+\bibitem{web} MDN contributors, Web technology for developers. \url{https://developer.mozilla.org/en-US/docs/Web}.
+\bibitem{sk} F. Pedregosa et al., Scikit-learn: Machine Learning in Python, JMLR, vol. 12, pp. 2825--2830, 2011.
+\end{thebibliography}
+\end{document}

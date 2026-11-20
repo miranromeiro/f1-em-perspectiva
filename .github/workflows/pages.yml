@@ -33,9 +33,9 @@ jobs:
           cp index.html dashboard.html _site/
           cp -R f1-alem-do-grid/docs _site/f1-alem-do-grid
       - name: Upload site files
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

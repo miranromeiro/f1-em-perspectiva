@@ -1,0 +1,3 @@
+# The dashboard embeds only the analyzed data needed by the browser.
+# Keep downloaded source files local; do not publish the entire source archive.
+/data/raw/

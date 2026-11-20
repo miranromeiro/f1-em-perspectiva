@@ -35,6 +35,6 @@ O script confere o SHA-256 do ZIP antes de gerar o painel. O HTML pronto incorpo
 
 ## Publicar no GitHub Pages
 
-O repositório inclui um workflow em `.github/workflows/pages.yml`. Depois de criar um repositório público no GitHub, envie estes arquivos para a branch `main` e, em **Settings → Pages**, selecione **GitHub Actions** como origem. O workflow publica `index.html` e `dashboard.html`; o primeiro abre o dashboard na página inicial.
+O repositório inclui um workflow em `.github/workflows/pages.yml`. Ele publica somente `index.html` e `dashboard.html`; o primeiro abre o dashboard na página inicial. Em **Settings → Pages**, a origem deve ser **GitHub Actions**.
 
 O site e o repositório serão públicos. O ZIP e os CSVs de origem em `data/raw/` não devem ser enviados: o painel já incorpora apenas os dados agregados e as observações usadas nos gráficos. O `.gitignore` exclui `data/raw/` do Git.

@@ -23,9 +23,13 @@ function desenharSerie(rows,periodo){
     pontos.push('<circle tabindex="0" cx="'+x(ano)+'" cy="'+y(taxaAno)+'" r="5" aria-label="'+desc+'"><title>'+desc+'</title></circle>');
   }
   el('serie').innerHTML=svg.join('')+'<path d="'+caminho+'"/>'+pontos.join('')+'</svg>';
-  el('ponto').textContent=pontos.length?'':'Sem largadas neste período e circuito.';
+  el('ponto').textContent=pontos.length?'Selecione um ponto para ver o resultado.':'Sem largadas neste período e circuito.';
   for(const ponto of el('serie').querySelectorAll('circle')){
-    ponto.onfocus=ponto.onmouseenter=()=>el('ponto').textContent=ponto.getAttribute('aria-label');
+    ponto.onfocus=ponto.onmouseenter=ponto.onclick=()=>{
+      el('serie').querySelector('.selecionado')?.classList.remove('selecionado');
+      ponto.classList.add('selecionado');
+      el('ponto').textContent=ponto.getAttribute('aria-label');
+    };
   }
 }
 function explorar(){
@@ -37,9 +41,9 @@ function explorar(){
     return '<div class="col" title="'+(group.length?pct(p):'Sem dados')+' · '+group.length+' largadas">'+(group.length?Math.round(100*p)+'%':'—')+'<div class="bar" style="height:'+(group.length?130*p:0)+'px"></div>'+(i+1)+'</div>';
   }).join('');
   const ranges=[[8,9],[10,11],[12,13],[8,13]];
-  tabela('heat',['Circuito','8–9','10–11','12–13','8–13'],[...new Set(rows.map(r=>r.circuito))].sort().map(c=>[nome(c),...ranges.map(([a,b])=>{
+  tabela('heat',['Circuito','8–9','10–11','12–13','Total P8–P13'],[...new Set(rows.map(r=>r.circuito))].sort().map(c=>[nome(c),...ranges.map(([a,b])=>{
     const g=rows.filter(r=>r.circuito===c&&r.grid>=a&&r.grid<=b),p=taxa(g);
-    return g.length?'<span style="display:block;background:rgba(225,32,30,'+(p*.5)+')">'+pct(p)+'<br><small style="letter-spacing:0">'+g.filter(r=>r.top10).length+'/'+g.length+'</small></span>':'—';
+    return g.length?'<span style="display:block;background:rgba(184,32,32,'+(0.04+p*.96)+')">'+pct(p)+'<br><small style="letter-spacing:0;color:#fff">'+g.filter(r=>r.top10).length+'/'+g.length+'</small></span>':'—';
   })]));
   const [a,b]=el('faixa').value.split('–').map(Number);
   el('forma').innerHTML=[false,true].map(high=>{

@@ -8,3 +8,12 @@ article,.numbers strong{background:linear-gradient(145deg,#202127,#17181c);borde
 .numbers{gap:12px}.numbers strong{padding:15px 20px;flex:1}.bar{background:#e84743;border-radius:4px 4px 0 0}.dot{background:#66d1c2}button{background:#b82724;color:white}select,button{border-radius:8px}
 .trace{width:100%;height:auto;min-width:520px}.trace text{fill:#c9c8ce;font:12px system-ui}.trace line{stroke:#393941}.trace path{fill:none;stroke:#ff635c;stroke-width:3}.trace circle{fill:#ff635c}.chart-scroll{overflow:auto}.columns .col{min-width:32px}.racewrap strong{color:#ff817c}
 @media(max-width:620px){.numbers{flex-wrap:wrap}.numbers strong{padding:10px}.numbers span{font-size:11px}header b{margin-bottom:6px}.calrow{gap:5px}}
+
+.leitura{margin-top:18px;border-top:1px solid #393941;padding-top:12px}
+.leitura summary{cursor:pointer;color:#ffc1bd;font-weight:650}
+.leitura p{margin:10px 0 0}
+#ponto{display:block;min-height:2.5em;padding:9px 14px;border-left:4px solid #ff635c;border-radius:4px;background:#322023;color:#ffaba6;font-weight:750;font-size:clamp(1rem,2vw,1.35rem);font-variant-numeric:tabular-nums}
+.trace circle.selecionado{stroke:white;stroke-width:3px;r:7px}
+#heat :is(th,td):last-child{border-left:3px solid #ff817c;background:#302528;font-weight:750}
+#heat th:last-child{color:#ffb0aa}
+#heat td span{border-radius:4px;padding:3px}

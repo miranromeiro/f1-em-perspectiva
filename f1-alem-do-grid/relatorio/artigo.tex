@@ -5,7 +5,7 @@
 \renewcommand{\abstractname}{Resumo}
 \renewcommand{\refname}{Referências}
 \title{F1 além do grid: previsão da chegada entre os dez primeiros em Grandes Prêmios de 2010 a 2025}
-\author{\IEEEauthorblockN{Miran Romeiro, Rafael Botezelli e Gustavo Carvalho}}
+\author{\IEEEauthorblockN{Miran Romeiro, Rafael Botezelli e Gustavo Carvalho}\\\IEEEauthorblockA{miran.silva@aluno.cps.sp.gov.br, Rafael.botezelli@aluno.cps.sp.gov.br, gustavo.silva125@aluno.cps.sp.gov.br}}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -42,11 +42,13 @@ P3&Métricas, matriz e GP&Regressões logísticas\\\hline
 A página estática usa HTML, CSS e JavaScript \cite{web}. Os dados e probabilidades ficam disponíveis localmente. Títulos e rótulos identificam a medida, com valores impressos para leitura independente das cores.
 \begin{enumerate}
 \item Barras por posição, filtradas por período, mostram a frequência de top 10. A altura cai de 91,2\% em P1 para 57,2\% em P10 e 9,3\% em P20 no período completo.
-\item Mapa por circuito (P1). A intensidade da cor representa proporção, acompanhada de sucessos e total. Três colunas distinguem pares de posições. Mudar o período expõe amostras menores.
+\item Série anual (P1). Uma linha liga temporadas consecutivas com amostra na faixa P8 a P13. Filtros de período e circuito distinguem variação temporal e composição de pistas. Cada ponto informa sucessos e total; lacunas indicam ausência de observações.
+\item Mapa por circuito (P1). A intensidade da cor representa proporção, acompanhada de sucessos e total. Três colunas distinguem pares de posições e a quarta agrega P8 a P13. Mudar o período expõe amostras menores.
 \item Pontos por grupo de forma (P2). O filtro de faixa de grid complementa o de período. O ponto representa a taxa e o traço mostra intervalo binomial de Wilson de 95\%. A dependência entre largadas do mesmo GP limita a interpretação inferencial.
-\item Barras de métricas (P3). Azul identifica grid e verde identifica modelo completo. O filtro de temporada permite comparar os modelos nas mesmas largadas. Os rótulos permitem ler diferenças pequenas.
+\item Barras de métricas (P3). Azul identifica grid e vermelho identifica o modelo completo. O filtro de temporada permite comparar os modelos nas mesmas largadas. Os rótulos permitem ler diferenças pequenas.
 \item Matriz (P3). Linhas representam resultado e colunas, previsão. Selecionar modelo e ano mostra como varia a contagem de erros de cada tipo.
-\item Quadro do GP (P3). Um seletor de corrida e um botão de revelação separam a previsão da conferência da chegada. A ordem do grid permite localizar pilotos específicos.
+\item Calibração (P3). Barras em cinco faixas comparam a média prevista e a frequência observada por modelo e temporada. No modelo completo, 100 das 203 largadas com previsão entre 40 e 60\% terminaram no top 10. A proximidade das médias de grupo pode ocultar diferenças individuais.
+\item Quadro do GP (P3). Um seletor de corrida e um botão de revelação separam a previsão da conferência da chegada. O público pode registrar um palpite. Antes da revelação a ordem é a do grid. Depois, a chegada oficial define a ordem e cada linha identifica acerto ou erro da classificação binária.
 \end{enumerate}
 \section{Técnica de aprendizado de máquina}
 A regressão logística estima a probabilidade do alvo binário por $p=(1+\exp(-z))^{-1}$, com $z$ igual ao intercepto mais a soma ponderada das entradas. Os pesos minimizam perda logarítmica com penalização L2. A padronização é ajustada somente nos dados usados para treinar em cada fase \cite{sk}. A primeira especificação usa grid. A segunda acrescenta formaPiloto e formaEquipe. Ambos os modelos usam informações disponíveis na largada.

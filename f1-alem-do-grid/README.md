@@ -11,4 +11,4 @@ Com Python 3.12 e um ambiente virtual, execute **python -m pip install -r analis
 Fonte: F1DB Contributors, v2026.20.0, licença CC BY 4.0. Recorte e transformações produzidos pelo projeto. [ZIP oficial](https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-csv.zip).
 
 ## Publicação
-Para publicar em endereço independente, use esta pasta como raiz de um novo repositório f1-alem-do-grid. No GitHub Pages selecione main e /docs. Também é possível hospedar diretamente o conteúdo de docs/ em um serviço estático. Antes da submissão, preencher contatos institucionais, identificar a primeira base e confirmar a formação original do trio e a técnica estudada.
+Para publicar em endereço independente, use esta pasta como raiz de um novo repositório f1-alem-do-grid. No GitHub Pages selecione main e /docs. Também é possível hospedar diretamente o conteúdo de docs/ em um serviço estático. Antes da submissão, identificar a primeira base e confirmar a formação original do trio e a técnica estudada.

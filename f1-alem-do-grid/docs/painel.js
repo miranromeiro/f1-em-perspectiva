@@ -133,3 +133,45 @@ for(const [titulo,caminho] of Object.entries(materiais)){
   const a=document.createElement('a');a.textContent=titulo;a.href=raiz+caminho;el('materiais').append(a);
 }
 explorar();avaliarPeriodo();prepararGP();mudarTela();
+
+function mostrarBarras(id,grupos){
+  el(id).replaceChildren();
+  for(const [nomeGrupo,total,acertos] of grupos){
+    const linha=document.createElement('div');
+    linha.className='resposta';
+    const valor=total?acertos/total:0;
+    linha.innerHTML='<strong>'+nomeGrupo+'</strong><span>'+acertos+' de '+total+' · <b>'+(total?pct(valor):'Sem dados')+'</b></span><div class="escala"><i style="width:'+100*valor+'%"></i></div>';
+    el(id).append(linha);
+  }
+}
+function mostrarFrequencias(filtro,destino,grupos){
+  const [inicio,fim]=el(filtro).value.split(',').map(Number);
+  const periodo=dados.filter(r=>r.ano>=inicio&&r.ano<=fim&&r.grid>=8&&r.grid<=13);
+  mostrarBarras(destino,grupos.map(([titulo,incluir])=>{
+    const rows=periodo.filter(incluir);
+    return [titulo,rows.length,rows.filter(r=>r.top10).length];
+  }));
+}
+el('anosGrid').onchange=()=>mostrarFrequencias('anosGrid','compararGrid',[
+  ['Largaram em 8º a 10º',r=>r.grid<=10],['Largaram em 11º a 13º',r=>r.grid>=11]
+]);
+el('anosEquipe').onchange=()=>mostrarFrequencias('anosEquipe','compararEquipe',[
+  ['Top 10 em pelo menos metade das largadas anteriores',r=>r.formaEquipe!==null&&r.formaEquipe>=.5],
+  ['Top 10 em menos da metade das largadas anteriores',r=>r.formaEquipe!==null&&r.formaEquipe<.5]
+]);
+el('anoFaixa').onchange=()=>{
+  const rows=teste.filter(r=>r.grid>=8&&r.grid<=13&&(!+el('anoFaixa').value||r.ano===+el('anoFaixa').value));
+  mostrarBarras('acertosFaixa',[['Só a posição de largada','base'],['Largada e histórico','historico']].map(([titulo,key])=>
+    [titulo,rows.length,rows.filter(r=>(r[key]>=.5)===Boolean(r.top10)).length]));
+};
+const exemplos=teste.filter(r=>r.ano===2023&&((r.gp==='saudi-arabia'&&r.piloto==='oscar-piastri')||(r.gp==='australia'&&r.piloto==='nico-hulkenberg')));
+for(const r of exemplos)el('caso').add(new Option(nome(r.piloto)+' · '+(r.gp==='australia'?'Austrália':'Arábia Saudita')+' 2023 · P'+r.grid));
+function verCaso(revelado){
+  const r=exemplos[el('caso').selectedIndex];
+  tabela('doisModelos',['Antes da corrida','Chance de top 10','Palpite'],[['Só a largada',r.base],['Largada e histórico',r.historico]].map(([titulo,p])=>[titulo,pct(p),p>=.5?'Entra':'Fica fora']));
+  el('chegadaCaso').textContent=revelado?'Chegada oficial: '+r.chegada+'º. '+(r.top10?'Entrou no top 10.':'Ficou fora do top 10.'):'';
+  el('abrirCaso').textContent=revelado?'Ocultar chegada':'Revelar chegada';
+  el('abrirCaso').onclick=()=>verCaso(!revelado);
+}
+el('caso').onchange=()=>verCaso(false);
+el('anosGrid').onchange();el('anosEquipe').onchange();el('anoFaixa').onchange();verCaso(false);

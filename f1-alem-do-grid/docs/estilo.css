@@ -17,3 +17,4 @@ article,.numbers strong{background:linear-gradient(145deg,#202127,#17181c);borde
 #heat :is(th,td):last-child{border-left:3px solid #ff817c;background:#302528;font-weight:750}
 #heat th:last-child{color:#ffb0aa}
 #heat td span{border-radius:4px;padding:3px}
+.resposta{margin:22px 0}.resposta strong,.resposta span{display:block}.resposta span{font-variant-numeric:tabular-nums;color:#ccc}.resposta b{color:#fff;font-size:1.4rem}.escala{background:#34343d;height:13px;border-radius:5px;overflow:hidden}.escala i{display:block;height:100%;background:#ff635c}.resposta:nth-child(2) .escala i{background:#8ba9ff}#doisModelos{margin:14px 0}

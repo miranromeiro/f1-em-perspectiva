@@ -9,10 +9,10 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Este estudo investiga em que medida a posição de largada e o histórico recente de pilotos e equipes ajudam a antecipar a classificação entre os dez primeiros em Grandes Prêmios de Fórmula 1. A partir do F1DB, organizamos uma tabela de 6.722 largadas com posição numérica entre 2010 e 2025. Investigamos diferenças entre circuitos, a associação entre forma recente da equipe e chegada e o desempenho preditivo em temporadas posteriores. Um painel interativo permite alterar o período, explorar faixas do grid e confrontar previsões individuais com a classificação oficial. Comparamos duas regressões logísticas em um teste temporal de 1.333 largadas. A inclusão do histórico elevou a área sob a curva ROC de 0,846 para 0,861, enquanto o F1 caiu de 0,793 para 0,789 no limiar de classificação adotado. Entre largadas da oitava à décima terceira posição, equipes com pelo menos metade das participações recentes no top 10 apresentaram maior frequência de chegada nesse grupo. As diferenças observadas descrevem associações históricas e dependem do tamanho da amostra de cada circuito.
+Este estudo investiga em que medida a posição de largada e o histórico recente de pilotos e equipes ajudam a antecipar a classificação entre os dez primeiros em Grandes Prêmios de Fórmula 1. A partir do F1DB, organizamos uma tabela de 6.722 largadas com posição numérica entre 2010 e 2025. Investigamos diferenças entre faixas de largada, a associação entre forma recente da equipe e chegada e o desempenho preditivo em temporadas posteriores. Um painel interativo permite alterar o período, explorar faixas do grid e confrontar previsões individuais com a classificação oficial. Comparamos duas regressões logísticas em um teste temporal de 1.333 largadas. A inclusão do histórico elevou a área sob a curva ROC de 0,846 para 0,861, enquanto o F1 caiu de 0,793 para 0,789 no limiar de classificação adotado. Entre largadas da oitava à décima terceira posição, equipes com pelo menos metade das participações recentes no top 10 apresentaram maior frequência de chegada nesse grupo. As diferenças observadas descrevem associações históricas e dependem do tamanho da amostra de cada circuito.
 \end{abstract}
 \section{Introdução}
-Com o grid definido, é possível formular uma previsão verificável antes da largada. Um piloto com baixa probabilidade ainda pode terminar entre os dez primeiros. Exploramos essa decisão com três perguntas sobre circuito, forma recente e generalização para corridas futuras.
+Com o grid definido, é possível formular uma previsão verificável antes da largada. Um piloto com baixa probabilidade ainda pode terminar entre os dez primeiros. Exploramos essa decisão com três perguntas sobre largada, forma recente e generalização para corridas futuras.
 \section{Base de dados}
 A distribuição CSV do F1DB v2026.20.0 foi coletada em novembro de 2026 \cite{f1}. Substituímos a base anterior, genérica e de ambiente controlado, para investigar observações dependentes do tempo, desistências e mudanças de equipe em competição real. Combinamos resultados de corridas principais e cadastro dos GPs com pandas \cite{pd}. Dos 6.916 registros originais, excluímos 51 inscrições sem largada (DNS, DNQ ou DNP) e 143 largadas sem grid numérico. Estas últimas contam para o histórico. Restam 6.722 linhas, 11 atributos e 329 GPs. Abandonos participam do denominador; a classificação oficial define o alvo.
 \begin{table}[h]\centering\caption{Dicionário da tabela final}
@@ -31,16 +31,17 @@ top10&Binário&1 se classificado de 1 a 10\\\hline
 \end{tabular}\end{table}
 As formas consideram até cinco etapas encerradas com participação da entidade na temporada. Para equipes, somamos top 10 e largadas de ambos os carros antes de dividir. A base registra ausência de histórico como vazio; o gráfico de forma exclui esses casos e o modelo usa 0,5 como ponto neutro.
 \section{Perguntas analíticas}
-P1: como varia entre circuitos e períodos a frequência de top 10 para quem larga de P8 a P13? P2: equipes com histórico recente distinto têm taxas diferentes em faixas comparáveis de grid? P3: incluir a forma anterior melhora a previsão em temporadas futuras e que erros persistem?
+P1: como varia a frequência de top 10 entre as largadas P8--P10 e P11--P13? P2: equipes com histórico recente distinto têm taxas diferentes em faixas comparáveis de grid? P3: incluir a forma anterior melhora a previsão em temporadas futuras e que erros persistem?
 \begin{table}[h]\centering\caption{Evidências usadas para cada pergunta}
 \begin{tabular}{lll}\hline Pergunta&Painel&Aprendizado de máquina\\\hline
-P1&Grid e mapa por circuito&---\\
+P1&Barras por faixa de grid&---\\
 P2&Forma recente por faixa&---\\
-P3&Métricas, matriz e GP&Regressões logísticas\\\hline
+P3&Acertos por modelo e GP&Regressões logísticas\\\hline
 \end{tabular}\end{table}
 \section{Dashboard}
 A página estática usa HTML, CSS e JavaScript \cite{web}. Os dados e probabilidades ficam disponíveis localmente. Títulos e rótulos identificam a medida, com valores impressos para leitura independente das cores.
 \begin{enumerate}
+\item A rota principal compara as faixas P8--P10 e P11--P13 em barras horizontais com filtro de período. Na segunda tela, barras na mesma escala comparam os grupos de forma na faixa conjunta, também por período. Cor e contagens identificam cada grupo. Na terceira tela, o seletor de caso permite confrontar probabilidades com a chegada. Barras de acertos por ano do teste comparam ambos os modelos sobre as mesmas largadas P8--P13.
 \item Barras por posição, filtradas por período, mostram a frequência de top 10. A altura cai de 91,2\% em P1 para 57,2\% em P10 e 9,3\% em P20 no período completo.
 \item Série anual (P1). Uma linha liga temporadas consecutivas com amostra na faixa P8 a P13. Filtros de período e circuito distinguem variação temporal e composição de pistas. Cada ponto informa sucessos e total; lacunas indicam ausência de observações.
 \item Mapa por circuito (P1). A intensidade da cor representa proporção, acompanhada de sucessos e total. Três colunas distinguem pares de posições e a quarta agrega P8 a P13. Mudar o período expõe amostras menores.
@@ -58,12 +59,12 @@ Treinamos em 2010--2019 (4.201 linhas), selecionamos o inverso da força de regu
 Acurácia&0,784&0,786\\Precisão&0,789&0,807\\Recall&0,796&0,773\\F1&0,793&0,789\\AUC-ROC&0,846&0,861\\\hline
 \end{tabular}\end{table}
 \section{Respostas às perguntas analíticas}
-\subsection{P1: circuito e período}
-Entre P8 e P13, Interlagos registrou 35 chegadas no top 10 em 88 largadas (39,8\%) e Suzuka, 46 em 84 (54,8\%). Em 2022--2025 as taxas foram 6/23 e 12/24. O filtro preserva a diferença nesses exemplos e reduz os denominadores. O desenho observacional impede atribuir a diferença ao traçado isoladamente.
+\subsection{P1: posição de largada}
+Os grupos P8--P10 e P11--P13 registraram 587/982 (59,8\%) e 380/974 (39,0\%) chegadas ao top 10, respectivamente. A diferença observada é de cerca de 21 pontos percentuais. Como comparação complementar, Interlagos registrou 35 chegadas no top 10 em 88 largadas (39,8\%) e Suzuka, 46 em 84 (54,8\%). Em 2022--2025 as taxas foram 6/23 e 12/24. O filtro preserva a diferença nesses exemplos e reduz os denominadores. O desenho observacional impede atribuir a diferença ao traçado isoladamente.
 \subsection{P2: forma da equipe}
 Entre P8 e P13 com histórico disponível, equipes com forma de pelo menos 50\% atingiram 601/993 (60,5\%) contra 321/870 (36,9\%) no grupo abaixo desse limiar. A diferença de 23,6 pontos percentuais combina histórico, pilotos e características dos carros. A ausência de histórico no começo da temporada limita a cobertura.
 \subsection{P3: previsão e erros}
-A AUC cresce cerca de 0,015 e indica melhor ordenação dos pares positivo-negativo. No limiar fixo, os falsos positivos caem de 147 para 128, mas os falsos negativos sobem de 141 para 157. Os verdadeiros negativos e positivos são 495 e 550 no modelo de grid e 514 e 534 no completo. A troca melhora a precisão à custa de recall. No Bahrein de 2023, Bottas largou em P12 com cerca de 43\% no modelo completo e chegou em P8: um falso negativo. Essa abertura de temporada ilustra o caso de forma indisponível.
+No subgrupo de teste P8--P13, o modelo de grid acertou 271/417 (65,0\%) e o completo 269/417 (64,5\%). Em 2023 na Arábia Saudita, o histórico reduziu de 64\% para 33\% a estimativa de Piastri, que terminou fora do top 10. O acerto individual ilustra a mudança de classe; o subgrupo mostra o saldo de duas classificações a menos. No grid inteiro, a AUC cresce cerca de 0,015 e indica melhor ordenação dos pares positivo-negativo. No limiar fixo, os falsos positivos caem de 147 para 128, mas os falsos negativos sobem de 141 para 157. Os verdadeiros negativos e positivos são 495 e 550 no modelo de grid e 514 e 534 no completo. A troca melhora a precisão à custa de recall. No Bahrein de 2023, Bottas largou em P12 com cerca de 43\% no modelo completo e chegou em P8: um falso negativo. Essa abertura de temporada ilustra o caso de forma indisponível.
 \section{Conclusão}
 O grid oferece uma referência forte e o histórico acrescenta informação modesta de ordenação. Um próximo experimento poderia avaliar calibração por temporada e quantificar incerteza com reamostragem por GP. A ausência de telemetria, clima e estratégia restringe a interpretação dos erros individuais. As previsões aplicam-se a largadas com grid numérico.
 \begin{thebibliography}{4}

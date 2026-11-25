@@ -164,14 +164,70 @@ el('anoFaixa').onchange=()=>{
   mostrarBarras('acertosFaixa',[['Só a posição de largada','base'],['Largada e histórico','historico']].map(([titulo,key])=>
     [titulo,rows.length,rows.filter(r=>(r[key]>=.5)===Boolean(r.top10)).length]));
 };
-const exemplos=teste.filter(r=>r.ano===2023&&((r.gp==='saudi-arabia'&&r.piloto==='oscar-piastri')||(r.gp==='australia'&&r.piloto==='nico-hulkenberg')));
-for(const r of exemplos)el('caso').add(new Option(nome(r.piloto)+' · '+(r.gp==='australia'?'Austrália':'Arábia Saudita')+' 2023 · P'+r.grid));
+const faixaTeste=teste.filter(r=>r.grid>=8&&r.grid<=13);
+for(const piloto of [...new Set(faixaTeste.map(r=>r.piloto))].sort())el('pilotoCaso').add(new Option(nome(piloto),piloto));
+el('pilotoCaso').value='oscar-piastri';
+function listarCasos(){
+  el('caso').replaceChildren();
+  faixaTeste.forEach((r,i)=>{
+    if(r.piloto===el('pilotoCaso').value)el('caso').add(new Option(nome(r.gp)+' '+r.ano+' · P'+r.grid,i));
+  });
+  verCaso(false);
+}
+el('pilotoCaso').onchange=listarCasos;
 function verCaso(revelado){
-  const r=exemplos[el('caso').selectedIndex];
+  const r=faixaTeste[+el('caso').value];
   tabela('doisModelos',['Antes da corrida','Chance de top 10','Palpite'],[['Só a largada',r.base],['Largada e histórico',r.historico]].map(([titulo,p])=>[titulo,pct(p),p>=.5?'Entra':'Fica fora']));
-  el('chegadaCaso').textContent=revelado?'Chegada oficial: '+r.chegada+'º. '+(r.top10?'Entrou no top 10.':'Ficou fora do top 10.'):'';
+  el('chegadaCaso').textContent=revelado?'Chegada oficial: '+r.chegada+(Number(r.chegada)?'º. ':'. ')+(r.top10?'Entrou no top 10.':'Ficou fora do top 10.'):'';
   el('abrirCaso').textContent=revelado?'Ocultar chegada':'Revelar chegada';
   el('abrirCaso').onclick=()=>verCaso(!revelado);
 }
 el('caso').onchange=()=>verCaso(false);
-el('anosGrid').onchange();el('anosEquipe').onchange();el('anoFaixa').onchange();verCaso(false);
+el('anosGrid').onchange();el('anosEquipe').onchange();el('anoFaixa').onchange();listarCasos();
+
+const historicoFaixa=dados.filter(r=>r.grid>=8&&r.grid<=13);
+function montarDuelo(){
+  const chave=el('tipoDuelo').value;
+  const nomes=[...new Set(historicoFaixa.map(r=>r[chave]))].sort();
+  for(const lado of ['ladoA','ladoB']){
+    el(lado).replaceChildren(...nomes.map(id=>new Option(nome(id),id)));
+  }
+  const defaults=chave==='circuito'?['interlagos','suzuka']:['fernando-alonso','lewis-hamilton'];
+  el('ladoA').value=defaults[0];el('ladoB').value=defaults[1];
+  desenharDuelo();
+}
+function desenharDuelo(){
+  const chave=el('tipoDuelo').value;
+  const svg=[],pontos=[],linhas=[];
+  for(const nivel of [0,.25,.5,.75,1]){
+    const y=150-120*nivel;
+    svg.push('<line x1="52" x2="646" y1="'+y+'" y2="'+y+'"/><text x="6" y="'+(y+4)+'">'+pct(nivel)+'</text>');
+  }
+  for(let pos=8;pos<=13;pos++)svg.push('<text x="'+(62+114*(pos-8))+'" y="177" text-anchor="middle">P'+pos+'</text>');
+  for(const [lado,cor] of [['ladoA','#ff776e'],['ladoB','#8ba9ff']]){
+    const id=el(lado).value;
+    const rows=historicoFaixa.filter(r=>r[chave]===id);
+    let caminho='',ligar=false;
+    for(let pos=8;pos<=13;pos++){
+      const g=rows.filter(r=>r.grid===pos);
+      if(!g.length){ligar=false;continue}
+      const x=62+114*(pos-8),y=150-120*taxa(g);
+      const dica=nome(id)+' · P'+pos+' · '+g.filter(r=>r.top10).length+' de '+g.length+' no top 10 ('+pct(taxa(g))+')';
+      caminho+=(ligar?' L':' M')+x+' '+y;ligar=true;
+      pontos.push('<circle tabindex="0" cx="'+x+'" cy="'+y+'" r="5" fill="'+cor+'" aria-label="'+dica+'"><title>'+dica+'</title></circle>');
+    }
+    svg.push('<path d="'+caminho+'" fill="none" stroke="'+cor+'" stroke-width="3"/>');
+    const grupos=[rows.filter(r=>r.top10),rows.filter(r=>Number(r.chegada)>10),rows.filter(r=>!Number(r.chegada))];
+    linhas.push([nome(id),...grupos.map(g=>'<span class="celula" style="background:rgba(195,48,48,'+(.06+.88*g.length/rows.length)+')">'+pct(g.length/rows.length)+'<br>'+g.length+'/'+rows.length+'</span>')]);
+  }
+  el('linhasDuelo').innerHTML='<svg viewBox="0 0 680 190" role="group" aria-label="Taxa de top 10 por posição de largada">'+svg.join('')+pontos.join('')+'</svg>';
+  el('leituraDuelo').textContent='Escolha um ponto para ler a contagem.';
+  for(const p of el('linhasDuelo').querySelectorAll('circle'))p.onclick=p.onfocus=p.onmouseenter=()=>el('leituraDuelo').textContent=p.getAttribute('aria-label');
+  tabela('destinos',['Comparado','Top 10','11º em diante','Sem posição numérica'],linhas);
+  for(const [a,b] of [['ladoA','ladoB'],['ladoB','ladoA']]){
+    for(const opt of el(a).options)opt.disabled=opt.value===el(b).value;
+  }
+}
+el('tipoDuelo').onchange=montarDuelo;
+el('ladoA').onchange=el('ladoB').onchange=desenharDuelo;
+montarDuelo();
